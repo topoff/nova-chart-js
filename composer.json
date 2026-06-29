@@ -1,6 +1,6 @@
 {
-    "name": "artcore-society/nova-chart-js",
-    "description": "nova-chartjs fork to support Nova 5",
+    "name": "topoff/nova-chart-js",
+    "description": "nova-chartjs fork to support Nova 5 (top-offerten maintained)",
     "keywords": [
         "laravel",
         "nova",
