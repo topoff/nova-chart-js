@@ -35,6 +35,7 @@
       v-if="!loading"
       :chart-data="datacollection"
       :options="options"
+      :height="chartHeight"
       :style="{ height: card.height && !['fixed', 'dynamic'].includes(card.height) ? card.height : 'auto' }"
     />
   </loading-card>
@@ -110,6 +111,15 @@ export default {
     };
   },
   computed: {
+    /**
+     * Numeric canvas height from a pixel card height (e.g. '600px'). The inner
+     * vue-chartjs component needs it as a prop — the wrapper style alone does
+     * not resize the canvas on initial render.
+     */
+    chartHeight() {
+      const h = parseInt(this.card.height, 10);
+      return Number.isFinite(h) && h > 0 ? h : 120;
+    },
     checkTitle() {
       return this.card.title !== undefined ? this.card.title : 'Chart JS Integration';
     },
