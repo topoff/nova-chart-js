@@ -36,6 +36,7 @@
       :chart-data="datacollection"
       :options="options"
       :height="chartHeight"
+      :styles="chartStyles"
       :style="{ height: card.height && !['fixed', 'dynamic'].includes(card.height) ? card.height : 'auto' }"
     />
   </loading-card>
@@ -119,6 +120,15 @@ export default {
     chartHeight() {
       const h = parseInt(this.card.height, 10);
       return Number.isFinite(h) && h > 0 ? h : 120;
+    },
+    /**
+     * With a pixel card height the vue-chartjs wrapper div must fill the
+     * styled outer container, otherwise the responsive canvas keeps its
+     * intrinsic height (canonical vue-chartjs fixed-height pattern).
+     */
+    chartStyles() {
+      const h = parseInt(this.card.height, 10);
+      return Number.isFinite(h) && h > 0 ? { position: 'relative', height: '100%' } : {};
     },
     checkTitle() {
       return this.card.title !== undefined ? this.card.title : 'Chart JS Integration';

@@ -3,6 +3,7 @@
       :chart-data="chartData"
       :chart-options="options"
       :height="height"
+      :styles="styles"
       :plugins="plugins"
   />
 </template>
@@ -17,7 +18,12 @@
         default: 120,
         type: Number
       }
-    },
+    ,
+    styles: {
+      default: () => ({}),
+      type: Object
+    }
+  },
     mixins: [HandlesDataLabelsPlugin],
   }
 </script>
