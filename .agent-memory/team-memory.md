@@ -21,7 +21,7 @@ If a section grows beyond concise facts and pointers, move details to `docs/` an
 
 ## Commands and workflows
 
-- Static analysis + style: `composer clean` (Rector + Pint + PHPStan). `composer format` / `composer analyse` / `composer lint`.
+- Before committing: `composer gates` (`composer clean`, plus `npm run prod` when `resources/js` changed). Static analysis + style: `composer clean` (Rector + Pint + PHPStan). `composer format` / `composer analyse` / `composer lint`.
 - **PHPStan baseline must be seeded once** (`vendor/bin/phpstan analyse --generate-baseline`) — needs Nova installed (license), so it can't run in CI/agents without `nova.laravel.com` auth.
 - Release: commit → `git tag vX.Y.Z` → **after the owner's push go** push branch + tag → ensure packagist syncs (then `composer update topoff/nova-chart-js` in `backend`). A stable tag is required; `^1.0.0` will not match `dev-master` alone.
 
