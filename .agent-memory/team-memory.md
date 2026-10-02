@@ -1,7 +1,7 @@
 # Team Memory: nova-chart-js
 
 This file contains deliberate, team-reviewed memory for this project.
-It is versioned in this repository and is intended for Claude Code, Codex, and OpenCode.
+It is versioned in this repository and is intended for Claude Code and Codex.
 
 Keep this file short. It is an agent memory index, not long-form documentation.
 If a section grows beyond concise facts and pointers, move details to `docs/` and link them here.
@@ -10,7 +10,7 @@ If a section grows beyond concise facts and pointers, move details to `docs/` an
 
 - Laravel **Nova 5** chart-card package. Fork of `coroo/nova-chartjs` (via `artcore-society/nova-chart-js`), maintained by top-offerten. Provides Stacked/Bar/Line/Area/Pie/Doughnut/Polar/Scatter cards + small API controllers.
 - **Composer name `topoff/nova-chart-js`**, but the **PHP namespace stays `Coroowicaksono\ChartJsIntegration`** (composer name ≠ namespace). **Never rename the namespace** — `backend` references those classes directly (`app/Nova/Metrics/...`).
-- Distribution: **public on packagist**, consumed by `backend` via `topoff/nova-chart-js`. GitHub repo is **`top-offerten/nova-chart-js`** (org `top-offerten`, NOT `topoff` — push access differs from the other topoff packages).
+- Distribution: **public on packagist**, consumed by `backend` via `topoff/nova-chart-js`. GitHub repo is **`topoff/nova-chart-js`** (org `topoff`, like all other topoff packages — `git remote -v`, verified 2026-10-01). The `top-offerten/nova-chart-js` repo is a dead duplicate fork; never push there.
 - `laravel/nova` is a **private, licensed** require → `composer install` needs `nova.laravel.com` auth (kept as a `repositories` entry in the package's own `composer.json`).
 - Ships built JS in `dist/` (source in `resources/js`); `CardServiceProvider` registers the Nova script + `routes/api.php`.
 
@@ -23,7 +23,7 @@ If a section grows beyond concise facts and pointers, move details to `docs/` an
 
 - Static analysis + style: `composer clean` (Rector + Pint + PHPStan). `composer format` / `composer analyse` / `composer lint`.
 - **PHPStan baseline must be seeded once** (`vendor/bin/phpstan analyse --generate-baseline`) — needs Nova installed (license), so it can't run in CI/agents without `nova.laravel.com` auth.
-- Release: commit → `git tag vX.Y.Z` → push branch + tag → ensure packagist syncs (then `composer update topoff/nova-chart-js` in `backend`). A stable tag is required; `^1.0.0` will not match `dev-master` alone.
+- Release: commit → `git tag vX.Y.Z` → **after the owner's push go** push branch + tag → ensure packagist syncs (then `composer update topoff/nova-chart-js` in `backend`). A stable tag is required; `^1.0.0` will not match `dev-master` alone.
 
 ## Conventions specific to this project
 
