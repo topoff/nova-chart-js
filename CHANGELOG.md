@@ -8,6 +8,18 @@ git push origin v0.4.2
 
 All notable changes to `chart-js-integration` will be documented in this file
 
+## v1.2.0 - 2026-10-11
+
+- :bug: Range selector works with Nova 5: `SelectControl` is driven by `v-model` + an options array. Before, the
+  pre-selection stayed empty, the control reset itself after a change and the handler received the native event,
+  so every choice fell back to the first range. Applies to all chart cards with a selector.
+- :sparkles: `rangeSelector(array $options, string $selected, ?string $rangeKey = null, ?string $unit = null)` on
+  every chart class (trait `Concerns\HasRangeSelector`). Custom data with `$rangeKey`: a change reloads the card
+  through Nova's dashboard cards route (`?chartRanges[rangeKey]=key`, the host renders the card for that range).
+  Model data: the endpoint gets `advanceFilterSelected`; with `$unit = 'month'` a numeric range means whole months.
+  Only the response to the latest choice is applied; on failure the selector returns to the shown range.
+- Without `rangeUnit` the model endpoint keeps treating numbers as days — existing cards are unchanged.
+
 ## v1.1.0 - 2026-10-11
 
 - :sparkles: StackedChart: range selector for custom (precomputed) data — `rangeSeries(array $rangeSeries, array $labels, string $default)`

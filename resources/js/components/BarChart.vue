@@ -21,14 +21,11 @@
         </default-button>
         <select-control
           size="xxs"
-          @change="handleFilterChanged"
-          :selected="advanceFilterSelected"
+          :options="rangeOptions"
+          v-model="advanceFilterSelected"
+          @selected="onRangeSelected"
           v-show="showAdvanceFilter"
-        >
-          <option v-for="filter in advanceFilter" v-bind:value="filter.value" :key="filter.key">
-            {{ filter.text }}
-          </option>
-        </select-control>
+        />
       </div>
     </div>
     <line-chart
@@ -44,8 +41,10 @@
 import LineChart from '../bar-chart';
 import IconRefresh from './Icons/IconRefresh';
 import IconExternalLink from './Icons/IconExternalLink';
+import HandlesRangeSelector, { initialRangeKey, rangeFilterList } from '../mixins/HandlesRangeSelector';
 
 export default {
+  mixins: [HandlesRangeSelector],
   components: {
     IconExternalLink,
     IconRefresh,
@@ -53,16 +52,6 @@ export default {
   },
   data() {
     this.card.options = this.card.options != undefined ? this.card.options : false;
-
-    // setup btn filter list
-    const btnFilterList = this.card.options.btnFilterList;
-    let filledAdvancedList = [];
-    let i = 0;
-
-    for (let index in btnFilterList) {
-      filledAdvancedList[i] = { value: index, text: btnFilterList[index] };
-      i++;
-    }
 
     return {
       datacollection: {},
@@ -90,31 +79,20 @@ export default {
             },
       showAdvanceFilter:
         this.card.model == 'custom' || this.card.model == undefined
-          ? false
+          ? this.card.options.rangeKey != undefined
           : this.card.options.btnFilter == true
           ? true
           : false,
-      advanceFilterSelected:
-        this.card.options.btnFilterDefault != undefined ? this.card.options.btnFilterDefault : 'QTD',
-      advanceFilter:
-        this.card.options.btnFilterList != undefined
-          ? filledAdvancedList
-          : [
-              { text: 'Year to Date', value: 'YTD' },
-              { text: 'Quarter to Date', value: 'QTD' },
-              { text: 'Month to Date', value: 'MTD' },
-              { text: '30 Days', value: 30 },
-              { text: '60 Days', value: 60 },
-              { text: '365 Days', value: 365 },
-            ],
+      advanceFilterSelected: initialRangeKey(this.card.options),
+      advanceFilter: rangeFilterList(this.card.options),
     };
   },
   computed: {
     checkTitle() {
-      return this.card.title !== undefined ? this.card.title : 'Chart JS Integration';
+      return this.rangeTitle || (this.card.title !== undefined ? this.card.title : 'Chart JS Integration');
     },
   },
-  props: ['card'],
+  props: ['card', 'dashboard'],
   mounted() {
     this.fillData();
   },
@@ -123,10 +101,6 @@ export default {
       window.location.reload();
     },
 
-    handleFilterChanged(value) {
-      this.advanceFilterSelected = value;
-      this.fillData();
-    },
     fillData() {
       this.options = {
         ...this.card.options,
@@ -223,9 +197,10 @@ export default {
       if (this.card.model == 'custom' || this.card.model == undefined) {
         // Custom Data
         this.title = this.card.title;
+        // rangeData = a range reloaded via rangeKey (HandlesRangeSelector).
         this.datacollection = {
-          labels: this.card.options.xaxis.categories,
-          datasets: this.card.series,
+          labels: this.rangeData ? this.rangeData.labels : this.card.options.xaxis.categories,
+          datasets: this.rangeData ? this.rangeData.series : this.card.series,
         };
 
         // START == SETUP POPUP
@@ -287,6 +262,7 @@ export default {
 
         // Use Model
         this.loading = true;
+        const seq = this.startRangeRequest();
         Nova.request()
           .get('/nova-vendor/coroowicaksono/check-data/endpoint', {
             params: {
@@ -299,6 +275,10 @@ export default {
             },
           })
           .then(({ data }) => {
+            if (!this.isCurrentRangeRequest(seq)) {
+              return;
+            }
+            this.appliedFilter = this.advanceFilterSelected;
             this.datacollection = {
               labels: data.dataset.xAxis,
               datasets: data.dataset.yAxis,
@@ -359,7 +339,11 @@ export default {
             // END == SETUP POPUP
           })
           .catch(({ response }) => {
-            this.errors = response.data.errors;
+            if (!this.isCurrentRangeRequest(seq)) {
+              return;
+            }
+            this.revertRange(this.appliedFilter !== this.advanceFilterSelected ? 'Zeitraum konnte nicht geladen werden.' : null);
+            this.errors = response && response.data ? response.data.errors : undefined;
             this.loading = false;
           });
       }

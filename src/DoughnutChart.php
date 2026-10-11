@@ -2,10 +2,13 @@
 
 namespace Coroowicaksono\ChartJsIntegration;
 
+use Coroowicaksono\ChartJsIntegration\Concerns\HasRangeSelector;
 use Laravel\Nova\Card;
 
 class DoughnutChart extends Card
 {
+    use HasRangeSelector;
+
     /**
      * The width of the card (1/3, 1/2, or full).
      *

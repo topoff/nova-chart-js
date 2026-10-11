@@ -169,7 +169,11 @@ class TotalRecordsController extends Controller
                     }
                 }
 
-                if (is_numeric($advanceFilterSelected)) {
+                // rangeSelector(..., unit: 'month') opts in: a numeric range means whole months back from
+                // the current one (like latestData). Without it a number keeps meaning days, as before.
+                if (is_numeric($advanceFilterSelected) && ($options['rangeUnit'] ?? null) === 'month') {
+                    $query->where($xAxisColumn, '>=', Carbon::now()->firstOfMonth()->startOfDay()->subMonthsNoOverflow(max(1, (int) $advanceFilterSelected) - 1));
+                } elseif (is_numeric($advanceFilterSelected)) {
                     $query->where($xAxisColumn, '>=', Carbon::now()->subDays($advanceFilterSelected));
                 } elseif ($advanceFilterSelected == 'YTD') {
                     $query->whereBetween($xAxisColumn, [Carbon::now()->firstOfYear()->startOfDay(), Carbon::now()]);

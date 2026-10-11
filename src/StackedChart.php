@@ -2,6 +2,7 @@
 
 namespace Coroowicaksono\ChartJsIntegration;
 
+use Coroowicaksono\ChartJsIntegration\Concerns\HasRangeSelector;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
 use Laravel\Nova\Card;
@@ -9,6 +10,8 @@ use Override;
 
 class StackedChart extends Card
 {
+    use HasRangeSelector;
+
     /**
      * The width of the card (1/3, 1/2, or full).
      *
