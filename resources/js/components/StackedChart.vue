@@ -90,14 +90,20 @@ export default {
                 fontFamily: "'Nunito'",
               },
             },
+      // Custom data: the selector switches between precomputed ranges (options.rangeSeries,
+      // keyed like options.btnFilterList) client-side, no request. Model mode: unchanged.
       showAdvanceFilter:
         this.card.model == 'custom' || this.card.model == undefined
-          ? false
+          ? this.card.options.rangeSeries != undefined
           : this.card.options.btnFilter == true
           ? true
           : false,
       advanceFilterSelected:
-        this.card.options.btnFilterDefault != undefined ? this.card.options.btnFilterDefault : 'QTD',
+        this.card.options.btnFilterDefault != undefined
+          ? this.card.options.btnFilterDefault
+          : this.card.options.rangeSeries != undefined
+          ? Object.keys(this.card.options.rangeSeries)[0]
+          : 'QTD',
       advanceFilter:
         this.card.options.btnFilterList != undefined
           ? filledAdvancedList
@@ -145,6 +151,27 @@ export default {
     handleFilterChanged(value) {
       this.advanceFilterSelected = value;
       this.fillData();
+    },
+    /**
+     * Precomputed range for custom data: options.rangeSeries[selected] = { labels, series }.
+     * Falls back to the first range when the selected key is missing; null without rangeSeries.
+     */
+    selectedRange() {
+      const ranges = this.card.options.rangeSeries;
+      if (ranges == undefined) {
+        return null;
+      }
+      const key = String(this.advanceFilterSelected);
+      if (ranges[key] != undefined) {
+        return ranges[key];
+      }
+      // Unknown key (e.g. default not shipped): normalise selector and data to the first range together.
+      const first = Object.keys(ranges)[0];
+      if (first == undefined) {
+        return null;
+      }
+      this.advanceFilterSelected = first;
+      return ranges[first];
     },
     fillData() {
       this.options = {
@@ -202,7 +229,10 @@ export default {
         const tooltiplist = ['custom', 'itemSort', 'filter'];
         for (let z = 0; z < tooltiplist.length; z++) {
           if (this.options.plugins.tooltip[tooltiplist[z]] != undefined) {
-            if (this.options.plugins.tooltip[tooltiplist[z]].search('function') != -1) {
+            if (
+              typeof this.options.plugins.tooltip[tooltiplist[z]] === 'string' &&
+              this.options.plugins.tooltip[tooltiplist[z]].search('function') != -1
+            ) {
               eval(
                 'this.options.plugins.tooltip.' + tooltiplist[z] + ' = ' + this.options.plugins.tooltip[tooltiplist[z]]
               );
@@ -228,7 +258,10 @@ export default {
           ];
           for (let i = 0; i < callbacklist.length; i++) {
             if (this.options.plugins?.tooltip?.callbacks?.[callbacklist[i]] != undefined) {
-              if (this.options.plugins.tooltip.callbacks[callbacklist[i]].search('function') != -1) {
+              if (
+                typeof this.options.plugins.tooltip.callbacks[callbacklist[i]] === 'string' &&
+                this.options.plugins.tooltip.callbacks[callbacklist[i]].search('function') != -1
+              ) {
                 eval(
                   'this.options.plugins.tooltip.callbacks.' +
                     callbacklist[i] +
@@ -242,11 +275,12 @@ export default {
       }
 
       if (this.card.model == 'custom' || this.card.model == undefined) {
-        // Custom Data
+        // Custom Data — with options.rangeSeries the selected range wins, otherwise xaxis + series as before.
         this.title = this.card.title;
+        const range = this.selectedRange();
         this.datacollection = {
-          labels: this.card.options.xaxis.categories,
-          datasets: this.card.series,
+          labels: range ? range.labels : this.card.options.xaxis.categories,
+          datasets: range ? range.series : this.card.series,
         };
 
         // START == SETUP POPUP

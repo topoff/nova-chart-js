@@ -8,6 +8,12 @@ git push origin v0.4.2
 
 All notable changes to `chart-js-integration` will be documented in this file
 
+## v1.1.0 - 2026-10-11
+
+- :sparkles: StackedChart: range selector for custom (precomputed) data — `rangeSeries(array $rangeSeries, array $labels, string $default)`
+  ships every range in the card payload; the existing select switches labels + datasets client-side without a request.
+  Cards without `rangeSeries` are unchanged.
+
 ## v0.4.2 - 2023-11-21
 
 - :sparkles: add new support for nova v4.31.x
